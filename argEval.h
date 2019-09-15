@@ -1,9 +1,37 @@
-# argEval
-Command line argument evaluator. It migth not be the most elegant code but it works and provides a lot o benefits compared to the traditional library...
+#ifndef _ARG_EVALUATOR_H_
+#define _ARG_EVALUATOR_H_
 
-## Example for the argEval library
+typedef int (*argCallback_t)(int argc, char** argv);
 
-```
+typedef enum{
+    vType_none,
+    vType_callback,
+    vType_string,
+    vType_integer,
+    vType_float,
+    vType_double
+} vType_t;
+
+typedef struct{
+    const char* shortOption;
+    const char* longOption;
+    const char* helpText;
+
+    int argumentCount;
+    vType_t variableType;
+    void* variablePointer; // this can only be applied when argumentCount = 1;
+    int* occurrences;
+} ArgumentDefinition_t;
+
+void argEval_enableHelpWithoutArguments();
+void argEval_registerArguments(const ArgumentDefinition_t* argumentArray, const size_t count, const ArgumentDefinition_t* helpArgument);
+void argEval_registerCallbackForExtraArguments(argCallback_t callback);
+int argEval_Parse(int argc, char** argv, FILE* errorOut);
+
+#endif //_ARG_EVALUATOR_H_
+
+/* Example: */
+/*
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -23,7 +51,7 @@ struct config_t{
 int setOutFileFunction(int argc, char** argv);
 int extraArgumentFunction(int argc, char** argv);
 
-/* The ArgumentDefinition_t structure
+ * The ArgumentDefinition_t structure
  ************************************
  *
  * 1: String for the short option (eg: program -v [...])
@@ -39,7 +67,7 @@ int extraArgumentFunction(int argc, char** argv);
  *         vType_double     - This is for the case when the option expects a double. Must be followed by a pointer to an double variable.
  * 6: The pointer specified by the last field. Can be NULL in case of vType_none
  * 7: This field expects a pointer to an integer variable which will count how many times the option has been put in the command line. This can be NULL if not used.
- */
+ *
 
 static ArgumentDefinition_t _argArray[] = {
   {"h", "help"   , "shows this screen"       , 0, vType_none,     NULL,               NULL},
@@ -77,4 +105,4 @@ int extraArgumentFunction(int argc, char** argv){
     printf("Got an extra Argument: %s\n", argv[0]);
     return -1;
 }
-```
+*/
